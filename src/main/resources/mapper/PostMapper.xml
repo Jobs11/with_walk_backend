@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.with_walk.mapper.PostMapper">
+
+    <!-- ResultMap 정의 -->
+    <resultMap id="PostResultMap" type="com.example.with_walk.dto.PostDTO">
+        <id property="pNum" column="p_num"/>
+        <result property="mId" column="m_id"/>
+        <result property="rNum" column="r_num"/>
+        <result property="pContent" column="p_content"/>
+        <result property="pImage" column="p_image"/>
+        <result property="pDate" column="p_date"/>
+        <result property="pLikes" column="p_likes"/>
+        <result property="authorName" column="author_name"/>
+        <result property="authorImage" column="author_image"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="isLikedByUser" column="is_liked_by_user"/>
+    </resultMap>
+
+    <!-- 게시글 작성 -->
+    <insert id="insertPost" parameterType="com.example.with_walk.dto.PostDTO"
+            useGeneratedKeys="true" keyProperty="pNum">
+        INSERT INTO posts (m_id, r_num, p_content, p_image, p_date, p_likes)
+        VALUES (#{mId}, #{rNum}, #{pContent}, #{pImage}, #{pDate}, 0)
+    </insert>
+
+    <!-- 전체 피드 조회 -->
+    <select id="selectAllFeeds" resultMap="PostResultMap">
+        SELECT
+            p.*,
+            m.m_name as author_name,
+            m.m_profile_image as author_image,
+            COALESCE(COUNT(DISTINCT pl.pl_num), 0) as like_count,
+            COALESCE(COUNT(DISTINCT pc.pc_num), 0) as comment_count,
+            EXISTS(
+                SELECT 1 FROM post_likes
+                WHERE p_num = p.p_num AND m_id = #{userId}
+            ) as is_liked_by_user
+        FROM posts p
+        LEFT JOIN members m ON p.m_id = m.m_id
+        LEFT JOIN post_likes pl ON p.p_num = pl.p_num
+        LEFT JOIN post_comments pc ON p.p_num = pc.p_num
+        GROUP BY p.p_num
+        ORDER BY p.p_date DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 친구 피드 조회 -->
+    <select id="selectFriendFeeds" resultMap="PostResultMap">
+        SELECT
+            p.*,
+            m.m_name as author_name,
+            m.m_profile_image as author_image,
+            COALESCE(COUNT(DISTINCT pl.pl_num), 0) as like_count,
+            COALESCE(COUNT(DISTINCT pc.pc_num), 0) as comment_count,
+            EXISTS(
+                SELECT 1 FROM post_likes
+                WHERE p_num = p.p_num AND m_id = #{userId}
+            ) as is_liked_by_user
+        FROM posts p
+        LEFT JOIN members m ON p.m_id = m.m_id
+        LEFT JOIN post_likes pl ON p.p_num = pl.p_num
+        LEFT JOIN post_comments pc ON p.p_num = pc.p_num
+        WHERE p.m_id IN (
+            SELECT to_user_id FROM friendships
+            WHERE from_user_id = #{userId} AND status = 'accepted'
+            UNION
+            SELECT from_user_id FROM friendships
+            WHERE to_user_id = #{userId} AND status = 'accepted'
+            UNION
+            SELECT #{userId}
+        )
+        GROUP BY p.p_num
+        ORDER BY p.p_date DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 게시글 상세 조회 -->
+    <select id="selectPostById" resultMap="PostResultMap">
+        SELECT
+            p.*,
+            m.m_name as author_name,
+            m.m_profile_image as author_image,
+            COALESCE(COUNT(DISTINCT pl.pl_num), 0) as like_count,
+            COALESCE(COUNT(DISTINCT pc.pc_num), 0) as comment_count,
+            EXISTS(
+                SELECT 1 FROM post_likes
+                WHERE p_num = p.p_num AND m_id = #{userId}
+            ) as is_liked_by_user
+        FROM posts p
+        LEFT JOIN members m ON p.m_id = m.m_id
+        LEFT JOIN post_likes pl ON p.p_num = pl.p_num
+        LEFT JOIN post_comments pc ON p.p_num = pc.p_num
+        WHERE p.p_num = #{pNum}
+        GROUP BY p.p_num
+    </select>
+
+    <!-- 게시글 삭제 -->
+    <delete id="deletePost">
+        DELETE FROM posts WHERE p_num = #{pNum}
+    </delete>
+
+    <!-- 좋아요 추가 -->
+    <insert id="insertLike" parameterType="com.example.with_walk.dto.PostLikeDTO">
+        INSERT INTO post_likes (p_num, m_id)
+        VALUES (#{pNum}, #{mId})
+    </insert>
+
+    <!-- 좋아요 삭제 -->
+    <delete id="deleteLike">
+        DELETE FROM post_likes
+        WHERE p_num = #{pNum} AND m_id = #{mId}
+    </delete>
+
+    <!-- 좋아요 존재 여부 -->
+    <select id="checkLikeExists" resultType="int">
+        SELECT COUNT(*) FROM post_likes
+        WHERE p_num = #{pNum} AND m_id = #{mId}
+    </select>
+
+    <!-- 좋아요 수 업데이트 -->
+    <update id="updateLikeCount">
+        UPDATE posts
+        SET p_likes = p_likes +
+        <choose>
+            <when test="increment">1</when>
+            <otherwise>-1</otherwise>
+        </choose>
+        WHERE p_num = #{pNum}
+    </update>
+
+    <!-- 인기 게시글 조회 -->
+    <select id="selectPopularPosts" resultMap="PostResultMap">
+        SELECT
+            p.*,
+            m.m_name as author_name,
+            COALESCE(COUNT(DISTINCT pl.pl_num), 0) as like_count
+        FROM posts p
+        LEFT JOIN members m ON p.m_id = m.m_id
+        LEFT JOIN post_likes pl ON p.p_num = pl.p_num
+        WHERE p.p_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        GROUP BY p.p_num
+        ORDER BY like_count DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

@@ -3,7 +3,7 @@ package com.example.with_walk.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.with_walk.dto.MemberVO;
+import com.example.with_walk.dto.MemberDTO;
 import com.example.with_walk.mapper.MemberMapper;
 
 @Service
@@ -13,17 +13,17 @@ public class MemberServiceimpl implements MemberService {
     MemberMapper memberMapper;
 
     @Override
-    public MemberVO getUser(String m_id, String m_password) {
+    public MemberDTO getUser(String m_id, String m_password) {
         return memberMapper.getUser(m_id, m_password);
     }
 
     @Override
-    public MemberVO getUserData(String m_id) {
+    public MemberDTO getUserData(String m_id) {
         return memberMapper.getUserData(m_id);
     }
 
     @Override
-    public void registerUser(MemberVO member) {
+    public void registerUser(MemberDTO member) {
         memberMapper.registerUser(member);
     }
 
@@ -33,12 +33,12 @@ public class MemberServiceimpl implements MemberService {
     }
 
     @Override
-    public void updateUser(MemberVO member) {
+    public void updateUser(MemberDTO member) {
         memberMapper.updateUser(member);
     }
 
     @Override
-    public void updateProfile(MemberVO member) {
+    public void updateProfile(MemberDTO member) {
         memberMapper.updateProfile(member);
     }
 

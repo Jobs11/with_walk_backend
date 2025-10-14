@@ -3,21 +3,21 @@ package com.example.with_walk.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.example.with_walk.dto.MemberVO;
+import com.example.with_walk.dto.MemberDTO;
 
 @Mapper
 public interface MemberMapper {
 
-    public MemberVO getUser(@Param("m_id") String m_id, @Param("m_password") String m_password);
+    public MemberDTO getUser(@Param("m_id") String m_id, @Param("m_password") String m_password);
 
-    public MemberVO getUserData(@Param("m_id") String m_id);
+    public MemberDTO getUserData(@Param("m_id") String m_id);
 
-    public void registerUser(MemberVO member);
+    public void registerUser(MemberDTO member);
 
     public void deleteUser(String m_id);
 
-    public void updateUser(MemberVO memberVO);
+    public void updateUser(MemberDTO memberVO);
 
-    public void updateProfile(MemberVO memberVO);
+    public void updateProfile(MemberDTO memberVO);
 
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.with_walk.mapper.StreetMapper">
+
+	<insert id="registerStreet" parameterType="com.example.with_walk.dto.StreetDTO">
+		insert into
+			streets (m_id, r_start_time, r_end_time, r_distance, r_time, r_speed, r_kcal)
+		values
+			(#{m_id}, #{r_start_time}, #{r_end_time}, #{r_distance}, #{r_time}, #{r_speed}, #{r_kcal})
+	</insert>
+
+	<select id="getStreetList">
+		select * from streets where m_id = #{m_id} and r_date LIKE CONCAT('%', #{r_date}, '%')
+	</select>
+
+
+	<select id="getStreetAllList">
+		select * from streets where m_id = #{m_id}
+	</select>
+
+    <delete id="deleteStreet">
+		delete from streets where r_num = #{r_num}
+	</delete>
+
+</mapper>
