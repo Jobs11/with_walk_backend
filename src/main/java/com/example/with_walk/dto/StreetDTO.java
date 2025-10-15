@@ -18,6 +18,7 @@ public class StreetDTO {
     private String r_time;
     private Double r_speed;
     private Integer r_kcal;
+    private String r_status;
 
     // Getter, Setter, Constructor...
 }

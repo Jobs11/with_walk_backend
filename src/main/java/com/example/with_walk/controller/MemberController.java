@@ -31,7 +31,7 @@ public class MemberController {
     public MemberDTO getUser(@RequestParam("m_id") String m_id, @RequestParam("m_password") String m_password) {
         MemberDTO member = memberService.getUser(m_id, m_password);
         System.out.println("회원 불러오기 성공");
-        log.info("회원 불러오기 성공: {}", member);
+        // log.info("회원 불러오기 성공: {}", member);
         return member;
     }
 
@@ -39,7 +39,7 @@ public class MemberController {
     public MemberDTO getUserData(@RequestParam("m_id") String m_id) {
         MemberDTO member = memberService.getUserData(m_id);
         System.out.println("회원 불러오기 성공");
-        log.info("회원 불러오기 성공: {}", member);
+        // log.info("회원 불러오기 성공: {}", member);
         return member;
     }
 
@@ -58,7 +58,7 @@ public class MemberController {
     public void updateProfile(@RequestBody MemberDTO member) {
         memberService.updateProfile(member);
         System.out.println("프로필 수정 성공");
-        log.info("프로필 수정 성공: {}", member);
+        // log.info("프로필 수정 성공: {}", member);
     }
 
 }

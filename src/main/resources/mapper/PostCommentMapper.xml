@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.with_walk.mapper.PostCommentMapper">
+
+    <!-- ResultMap 정의 -->
+    <resultMap id="PostCommentResultMap" type="com.example.with_walk.dto.PostCommentDTO">
+        <id property="pcNum" column="pc_num"/>
+        <result property="pNum" column="p_num"/>
+        <result property="mId" column="m_id"/>
+        <result property="pcContent" column="pc_content"/>
+        <result property="pcDate" column="pc_date"/>
+        <result property="authorName" column="author_name"/>
+        <result property="authorImage" column="author_image"/>
+    </resultMap>
+
+    <!-- 댓글 목록 조회 (작성자 정보 포함) -->
+   <select id="selectCommentsByPostId" resultMap="PostCommentResultMap">
+        SELECT
+            pc.pc_num,
+            pc.p_num,
+            pc.m_id,
+            pc.pc_content,
+            pc.pc_date,
+            m.m_name as author_name,
+            m.m_profile_image as author_image
+        FROM post_comments pc
+        LEFT JOIN members m ON pc.m_id = m.m_id
+        WHERE pc.p_num = #{pNum}
+        AND pc.pc_status = '공개'
+        ORDER BY pc.pc_date DESC
+    </select>
+
+    <!-- 댓글 작성 -->
+    <insert id="insertComment" parameterType="com.example.with_walk.dto.PostCommentDTO"
+            useGeneratedKeys="true" keyProperty="pcNum">
+        INSERT INTO post_comments (p_num, m_id, pc_content, pc_date)
+        VALUES (#{pNum}, #{mId}, #{pcContent}, #{pcDate})
+    </insert>
+
+    <!-- 댓글 삭제 -->
+    <delete id="deleteComment">
+        UPDATE post_comments SET pc_status = '비공개' WHERE pc_num = #{pcNum}
+    </delete>
+
+    <!-- 댓글 수 조회 -->
+    <select id="countCommentsByPostId" resultType="int">
+        SELECT COUNT(*) FROM post_comments WHERE p_num = #{pNum}
+    </select>
+
+    <!-- 특정 댓글 조회 -->
+    <select id="selectCommentById" resultMap="PostCommentResultMap">
+        SELECT
+            pc.pc_num,
+            pc.p_num,
+            pc.m_id,
+            pc.pc_content,
+            pc.pc_date,
+            m.m_name as author_name,
+            m.m_profile_image as author_image
+        FROM post_comments pc
+        LEFT JOIN members m ON pc.m_id = m.m_id
+        WHERE pc.pc_num = #{pcNum}
+    </select>
+
+</mapper>

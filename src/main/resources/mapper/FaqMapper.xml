@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.with_walk.mapper.FaqMapper">
+
+    <resultMap id="FaqResultMap" type="com.example.with_walk.dto.FaqDTO">
+        <id property="faqId" column="faq_id"/>
+        <result property="category" column="category"/>
+        <result property="question" column="question"/>
+        <result property="answer" column="answer"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="displayOrder" column="display_order"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 전체 FAQ 조회 -->
+    <select id="selectAllFaqs" resultMap="FaqResultMap">
+        SELECT * FROM faqs
+        WHERE is_active = TRUE
+        ORDER BY display_order ASC
+    </select>
+
+    <!-- 카테고리별 FAQ 조회 -->
+    <select id="selectFaqsByCategory" resultMap="FaqResultMap">
+        SELECT * FROM faqs
+        WHERE category = #{category} AND is_active = TRUE
+        ORDER BY display_order ASC
+    </select>
+
+    <!-- FAQ 검색 -->
+    <select id="searchFaqs" resultMap="FaqResultMap">
+        SELECT * FROM faqs
+        WHERE is_active = TRUE
+        AND (question LIKE CONCAT('%', #{keyword}, '%')
+        OR answer LIKE CONCAT('%', #{keyword}, '%'))
+        ORDER BY display_order ASC
+    </select>
+
+    <!-- FAQ 상세 조회 -->
+    <select id="selectFaqById" resultMap="FaqResultMap">
+        SELECT * FROM faqs
+        WHERE faq_id = #{faqId}
+    </select>
+
+    <!-- 조회수 증가 -->
+    <update id="updateViewCount">
+        UPDATE faqs
+        SET view_count = view_count + 1
+        WHERE faq_id = #{faqId}
+    </update>
+
+    <!-- FAQ 등록 -->
+    <insert id="insertFaq" parameterType="com.example.with_walk.dto.FaqDTO"
+            useGeneratedKeys="true" keyProperty="faqId">
+        INSERT INTO faqs (category, question, answer, display_order, is_active)
+        VALUES (#{category}, #{question}, #{answer}, #{displayOrder}, #{isActive})
+    </insert>
+
+    <!-- FAQ 수정 -->
+    <update id="updateFaq">
+        UPDATE faqs
+        SET category = #{category},
+            question = #{question},
+            answer = #{answer},
+            display_order = #{displayOrder},
+            is_active = #{isActive}
+        WHERE faq_id = #{faqId}
+    </update>
+
+    <!-- FAQ 삭제 -->
+    <delete id="deleteFaq">
+        DELETE FROM faqs
+        WHERE faq_id = #{faqId}
+    </delete>
+
+</mapper>

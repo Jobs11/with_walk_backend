@@ -9,6 +9,9 @@ public interface PostService {
     // 게시글 작성 (Cloudinary URL 포함된 DTO만 받음)
     int createPost(PostDTO post);
 
+    // 게시글 수정
+    int updatePost(PostDTO post);
+
     // 피드 목록 조회
     List<PostDTO> getFeeds(String userId, int page, int size);
 

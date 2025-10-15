@@ -12,16 +12,21 @@
 	</insert>
 
 	<select id="getStreetList">
-		select * from streets where m_id = #{m_id} and r_date LIKE CONCAT('%', #{r_date}, '%')
+		select * from streets where m_id = #{m_id} and r_date LIKE CONCAT('%', #{r_date}, '%') and r_status = '공개'
 	</select>
 
 
 	<select id="getStreetAllList">
-		select * from streets where m_id = #{m_id}
+		select * from streets where m_id = #{m_id} and r_status = '공개'
 	</select>
 
     <delete id="deleteStreet">
-		delete from streets where r_num = #{r_num}
+		update
+			streets
+		set
+			r_status = '비공개'
+		where
+			r_num = #{r_num}
 	</delete>
 
 </mapper>

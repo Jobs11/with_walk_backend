@@ -27,6 +27,15 @@
         VALUES (#{mId}, #{rNum}, #{pContent}, #{pImage}, #{pDate}, 0)
     </insert>
 
+    <!-- 게시글 수정 -->
+    <update id="updatePost" parameterType="com.example.with_walk.dto.PostDTO">
+        UPDATE posts
+        SET
+            p_content = #{pContent},
+            p_image = #{pImage}
+        WHERE p_num = #{pNum}
+    </update>
+
     <!-- 전체 피드 조회 -->
     <select id="selectAllFeeds" resultMap="PostResultMap">
         SELECT
@@ -43,8 +52,9 @@
         LEFT JOIN members m ON p.m_id = m.m_id
         LEFT JOIN post_likes pl ON p.p_num = pl.p_num
         LEFT JOIN post_comments pc ON p.p_num = pc.p_num
+        WHERE p.p_status = '공개'
         GROUP BY p.p_num
-        ORDER BY p.p_date DESC
+        ORDER BY RAND()
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
@@ -64,7 +74,8 @@
         LEFT JOIN members m ON p.m_id = m.m_id
         LEFT JOIN post_likes pl ON p.p_num = pl.p_num
         LEFT JOIN post_comments pc ON p.p_num = pc.p_num
-        WHERE p.m_id IN (
+        WHERE p.p_status = '공개'
+        AND p.m_id IN (
             SELECT to_user_id FROM friendships
             WHERE from_user_id = #{userId} AND status = 'accepted'
             UNION
@@ -74,7 +85,7 @@
             SELECT #{userId}
         )
         GROUP BY p.p_num
-        ORDER BY p.p_date DESC
+        ORDER BY RAND()
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
@@ -100,7 +111,7 @@
 
     <!-- 게시글 삭제 -->
     <delete id="deletePost">
-        DELETE FROM posts WHERE p_num = #{pNum}
+        UPDATE posts SET p_status = '비공개' WHERE p_num = #{pNum}
     </delete>
 
     <!-- 좋아요 추가 -->

@@ -34,6 +34,25 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
+    public int updatePost(PostDTO post) {
+        // 게시글이 존재하는지 확인
+        PostDTO existingPost = postMapper.selectPostById(post.getPNum(), post.getMId());
+
+        if (existingPost == null) {
+            throw new RuntimeException("게시글을 찾을 수 없습니다");
+        }
+
+        // 작성자 확인 (본인만 수정 가능)
+        if (!existingPost.getMId().equals(post.getMId())) {
+            throw new RuntimeException("본인의 게시글만 수정할 수 있습니다");
+        }
+
+        // 게시글 수정
+        return postMapper.updatePost(post);
+    }
+
+    @Override
     public List<PostDTO> getFeeds(String userId, int page, int size) {
         int offset = (page - 1) * size;
         return postMapper.selectAllFeeds(userId, offset, size);

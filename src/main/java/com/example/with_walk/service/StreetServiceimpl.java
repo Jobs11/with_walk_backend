@@ -32,6 +32,7 @@ public class StreetServiceimpl implements StreetService {
     @Override
     public void deleteStreet(Integer r_num) {
         streetMapper.deleteStreet(r_num);
+        System.out.println("발자국삭제 " + r_num);
     }
 
 }
