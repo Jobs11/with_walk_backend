@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.with_walk.mapper.PostCommentLikeMapper">
+
+    <!-- 좋아요 추가 -->
+    <insert id="insertLike" parameterType="com.example.with_walk.dto.PostCommentLikeDTO">
+        INSERT INTO post_comment_likes (pc_num, m_id, pcl_date)
+        VALUES (#{pcNum}, #{mId}, NOW())
+    </insert>
+
+    <!-- 좋아요 삭제 -->
+    <delete id="deleteLike">
+        DELETE FROM post_comment_likes
+        WHERE pc_num = #{pcNum} AND m_id = #{mId}
+    </delete>
+
+    <!-- 좋아요 존재 여부 확인 -->
+    <select id="existsLike" resultType="Integer">
+        SELECT COUNT(*)
+        FROM post_comment_likes
+        WHERE pc_num = #{pcNum} AND m_id = #{mId}
+    </select>
+
+    <!-- 댓글의 총 좋아요 개수 -->
+    <select id="countLikes" resultType="Integer">
+        SELECT COUNT(*)
+        FROM post_comment_likes
+        WHERE pc_num = #{pcNum}
+    </select>
+
+    <!-- 사용자의 좋아요 여부 확인 -->
+    <select id="isLikedByUser" resultType="Boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM post_comment_likes
+        WHERE pc_num = #{pcNum} AND m_id = #{mId}
+    </select>
+
+    <!-- 여러 댓글의 좋아요 정보 일괄 조회 -->
+    <select id="getBatchLikeInfo" resultType="map">
+        SELECT
+            pc_num,
+            COUNT(*) as like_count,
+            MAX(CASE WHEN m_id = #{mId} THEN 1 ELSE 0 END) as is_liked
+        FROM post_comment_likes
+        WHERE pc_num IN
+        <foreach collection="pcNums" item="pcNum" open="(" close=")" separator=",">
+            #{pcNum}
+        </foreach>
+        GROUP BY pc_num
+    </select>
+
+</mapper>

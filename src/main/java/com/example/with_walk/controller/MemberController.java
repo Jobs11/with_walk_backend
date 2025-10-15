@@ -1,5 +1,7 @@
 package com.example.with_walk.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +40,22 @@ public class MemberController {
     @GetMapping("/getUserdata")
     public MemberDTO getUserData(@RequestParam("m_id") String m_id) {
         MemberDTO member = memberService.getUserData(m_id);
+        System.out.println("회원 불러오기 성공");
+        // log.info("회원 불러오기 성공: {}", member);
+        return member;
+    }
+
+    @GetMapping("/check")
+    public MemberDTO checkNick(@RequestParam("m_nickname") String m_nickname) {
+        MemberDTO member = memberService.checkNick(m_nickname);
+        System.out.println("회원 불러오기 성공");
+        // log.info("회원 불러오기 성공: {}", member);
+        return member;
+    }
+
+    @GetMapping("/search")
+    public List<MemberDTO> searchNick(@RequestParam("m_nickname") String m_nickname) {
+        List<MemberDTO> member = memberService.searchNick(m_nickname);
         System.out.println("회원 불러오기 성공");
         // log.info("회원 불러오기 성공: {}", member);
         return member;

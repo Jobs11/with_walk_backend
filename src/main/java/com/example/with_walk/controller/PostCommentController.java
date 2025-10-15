@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.with_walk.dto.PostCommentDTO;
@@ -30,13 +32,15 @@ public class PostCommentController {
     private final PostCommentService commentService;
 
     /**
-     * 댓글 목록 조회
-     * GET /post/comments/{pNum}
+     * 댓글 목록 조회 (좋아요 정보 포함)
+     * GET /post/comments/{pNum}?m_id=user123
      */
     @GetMapping("/comments/{pNum}")
-    public ResponseEntity<?> getComments(@PathVariable Integer pNum) {
+    public ResponseEntity<?> getComments(
+            @PathVariable Integer pNum,
+            @RequestParam(name = "m_id", required = false) String mId) {
         try {
-            List<PostCommentDTO> comments = commentService.getComments(pNum);
+            List<PostCommentDTO> comments = commentService.getComments(pNum, mId);
             return ResponseEntity.ok(comments);
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,5 +117,14 @@ public class PostCommentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("오류 발생: " + e.getMessage());
         }
+    }
+
+    @GetMapping("comment-writer/{pNum}")
+    public ResponseEntity<List<PostCommentDTO>> getCommentList(
+            @PathVariable Integer pNum,
+            @RequestHeader("user_id") String currentUserId // 헤더에서 현재 사용자 ID 받기
+    ) {
+        List<PostCommentDTO> comments = commentService.getCommentList(pNum, currentUserId);
+        return ResponseEntity.ok(comments);
     }
 }

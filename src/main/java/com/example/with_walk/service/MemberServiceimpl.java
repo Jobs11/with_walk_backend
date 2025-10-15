@@ -1,5 +1,7 @@
 package com.example.with_walk.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,16 @@ public class MemberServiceimpl implements MemberService {
     @Override
     public MemberDTO getUserData(String m_id) {
         return memberMapper.getUserData(m_id);
+    }
+
+    @Override
+    public MemberDTO checkNick(String m_nickname) {
+        return memberMapper.checkNick(m_nickname);
+    }
+
+    @Override
+    public List<MemberDTO> searchNick(String m_nickname) {
+        return memberMapper.searchNick(m_nickname);
     }
 
     @Override

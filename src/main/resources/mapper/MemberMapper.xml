@@ -19,6 +19,15 @@
 		select * from members where m_id = #{m_id}
 	</select>
 
+	<select id="checkNick">
+		select * from members where m_nickname = #{m_nickname}
+	</select>
+
+	<select id="searchNick">
+		SELECT m_nickname FROM members WHERE m_nickname LIKE CONCAT('%', #{m_nickname}, '%')
+	</select>
+
+
     <update id="updateUser">
 		update
 			members
@@ -40,6 +49,8 @@
 		where
 			m_id = #{m_id}
 	</update>
+
+
 
 
 </mapper>

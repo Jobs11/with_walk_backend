@@ -18,8 +18,8 @@ public class PostCommentServiceImpl implements PostCommentService {
     private final PostCommentMapper commentMapper;
 
     @Override
-    public List<PostCommentDTO> getComments(Integer pNum) {
-        return commentMapper.selectCommentsByPostId(pNum);
+    public List<PostCommentDTO> getComments(Integer pNum, String mId) {
+        return commentMapper.selectCommentsByPostId(pNum, mId);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class PostCommentServiceImpl implements PostCommentService {
     @Transactional
     public int deleteComment(Integer pcNum) {
         // 댓글 정보 먼저 조회 (게시글 번호 필요)
-        PostCommentDTO comment = commentMapper.selectCommentById(pcNum);
+        // PostCommentDTO comment = commentMapper.selectCommentById(pcNum);
 
         // 댓글 삭제
         int result = commentMapper.deleteComment(pcNum);
@@ -59,5 +59,14 @@ public class PostCommentServiceImpl implements PostCommentService {
     @Override
     public int getCommentCount(Integer pNum) {
         return commentMapper.countCommentsByPostId(pNum);
+    }
+
+    @Override
+    public List<PostCommentDTO> getCommentList(Integer pNum, String user_id) {
+        return commentMapper.getCommentList(pNum, user_id);
+    }
+
+    public PostCommentDTO getCommentByIdWithLikeInfo(Integer pcNum, String userId) {
+        return commentMapper.getCommentByIdWithLikeInfo(pcNum, userId);
     }
 }

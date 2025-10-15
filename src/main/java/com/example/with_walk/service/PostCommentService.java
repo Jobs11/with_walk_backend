@@ -6,8 +6,8 @@ import com.example.with_walk.dto.PostCommentDTO;
 
 public interface PostCommentService {
 
-    // 댓글 목록 조회
-    List<PostCommentDTO> getComments(Integer pNum);
+    // 댓글 목록 조회 (좋아요 정보 포함)
+    List<PostCommentDTO> getComments(Integer pNum, String mId);
 
     // 댓글 작성
     int createComment(PostCommentDTO comment);
@@ -17,4 +17,12 @@ public interface PostCommentService {
 
     // 댓글 수 조회
     int getCommentCount(Integer pNum);
+
+    List<PostCommentDTO> getCommentList(
+            Integer pNum,
+            String user_id);
+
+    PostCommentDTO getCommentByIdWithLikeInfo(
+            Integer pcNum,
+            String userId);
 }

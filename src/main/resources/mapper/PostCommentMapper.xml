@@ -4,7 +4,7 @@
 
 <mapper namespace="com.example.with_walk.mapper.PostCommentMapper">
 
-    <!-- ResultMap 정의 -->
+    <!-- 🆕 ResultMap 추가 (명시적 매핑) -->
     <resultMap id="PostCommentResultMap" type="com.example.with_walk.dto.PostCommentDTO">
         <id property="pcNum" column="pc_num"/>
         <result property="pNum" column="p_num"/>
@@ -13,10 +13,14 @@
         <result property="pcDate" column="pc_date"/>
         <result property="authorName" column="author_name"/>
         <result property="authorImage" column="author_image"/>
+        <result property="isLiked" column="is_liked"/>
+        <result property="likeCount" column="like_count"/>
+        <!-- 🔴 핵심: 명시적으로 매핑! -->
+        <result property="isLikedByAuthor" column="is_liked_by_author"/>
     </resultMap>
 
-    <!-- 댓글 목록 조회 (작성자 정보 포함) -->
-   <select id="selectCommentsByPostId" resultMap="PostCommentResultMap">
+    <!-- 댓글 목록 조회 (좋아요 정보 포함) -->
+    <select id="selectCommentsByPostId" resultType="com.example.with_walk.dto.PostCommentDTO">
         SELECT
             pc.pc_num,
             pc.p_num,
@@ -24,11 +28,16 @@
             pc.pc_content,
             pc.pc_date,
             m.m_name as author_name,
-            m.m_profile_image as author_image
+            m.m_profile_image as author_image,
+            COALESCE(COUNT(DISTINCT pcl.pcl_num), 0) as like_count,
+            MAX(CASE WHEN pcl.m_id = #{mId} THEN 1 ELSE 0 END) as is_liked
         FROM post_comments pc
         LEFT JOIN members m ON pc.m_id = m.m_id
+        LEFT JOIN post_comment_likes pcl ON pc.pc_num = pcl.pc_num
         WHERE pc.p_num = #{pNum}
         AND pc.pc_status = '공개'
+        GROUP BY pc.pc_num, pc.p_num, pc.m_id, pc.pc_content, pc.pc_date,
+                 m.m_name, m.m_profile_image
         ORDER BY pc.pc_date DESC
     </select>
 
@@ -46,11 +55,14 @@
 
     <!-- 댓글 수 조회 -->
     <select id="countCommentsByPostId" resultType="int">
-        SELECT COUNT(*) FROM post_comments WHERE p_num = #{pNum}
+        SELECT COUNT(*)
+        FROM post_comments
+        WHERE p_num = #{pNum}
+        AND pc_status = '공개'
     </select>
 
     <!-- 특정 댓글 조회 -->
-    <select id="selectCommentById" resultMap="PostCommentResultMap">
+    <select id="selectCommentById" resultType="com.example.with_walk.dto.PostCommentDTO">
         SELECT
             pc.pc_num,
             pc.p_num,
@@ -58,10 +70,104 @@
             pc.pc_content,
             pc.pc_date,
             m.m_name as author_name,
-            m.m_profile_image as author_image
+            m.m_profile_image as author_image,
+            0 as like_count,
+            0 as is_liked
         FROM post_comments pc
         LEFT JOIN members m ON pc.m_id = m.m_id
         WHERE pc.pc_num = #{pcNum}
+    </select>
+
+    <!-- 🔴 수정된 getCommentList - resultMap 사용 -->
+    <select id="getCommentList" resultMap="PostCommentResultMap">
+        SELECT
+            pc.pc_num,
+            pc.p_num,
+            pc.m_id,
+            pc.pc_content,
+            pc.pc_date,
+            m.m_nickname as author_name,
+            m.m_profile_image as author_image,
+
+            -- 현재 사용자가 좋아요 눌렀는지
+            CASE WHEN pcl.m_id IS NOT NULL THEN true ELSE false END as is_liked,
+
+            -- 좋아요 개수
+            (SELECT COUNT(*)
+             FROM post_comment_likes
+             WHERE pc_num = pc.pc_num) as like_count,
+
+            -- 게시글 작성자가 이 댓글에 좋아요 눌렀는지
+            CASE WHEN EXISTS(
+                SELECT 1
+                FROM post_comment_likes pcl2
+                WHERE pcl2.pc_num = pc.pc_num
+                AND pcl2.m_id = (
+                    SELECT p.m_id
+                    FROM posts p
+                    WHERE p.p_num = pc.p_num
+                )
+            ) THEN true ELSE false END as is_liked_by_author
+
+        FROM post_comments pc
+        LEFT JOIN members m ON pc.m_id = m.m_id
+        LEFT JOIN post_comment_likes pcl ON pc.pc_num = pcl.pc_num
+            AND pcl.m_id = #{user_id}
+        WHERE pc.p_num = #{pNum}
+        ORDER BY pc.pc_date DESC
+    </select>
+
+    <!-- 단일 댓글 조회 쿼리 추가 -->
+    <select id="getCommentByIdWithLikeInfo" resultMap="PostCommentResultMap">
+        SELECT
+            pc.pc_num,
+            pc.p_num,
+            pc.m_id,
+            pc.pc_content,
+            pc.pc_date,
+            m.m_nickname as author_name,
+            m.m_profile_image as author_image,
+
+            -- 현재 사용자가 좋아요 눌렀는지
+            CASE WHEN pcl.m_id IS NOT NULL THEN true ELSE false END as is_liked,
+
+            -- 좋아요 개수
+            (SELECT COUNT(*)
+            FROM post_comment_likes
+            WHERE pc_num = pc.pc_num) as like_count,
+
+            -- 게시글 작성자가 이 댓글에 좋아요 눌렀는지
+            CASE WHEN EXISTS(
+                SELECT 1
+                FROM post_comment_likes pcl2
+                WHERE pcl2.pc_num = pc.pc_num
+                AND pcl2.m_id = (
+                    SELECT p.m_id
+                    FROM posts p
+                    WHERE p.p_num = pc.p_num
+                )
+            ) THEN true ELSE false END as is_liked_by_author
+
+        FROM post_comments pc
+        LEFT JOIN members m ON pc.m_id = m.m_id
+        LEFT JOIN post_comment_likes pcl ON pc.pc_num = pcl.pc_num
+            AND pcl.m_id = #{user_id}
+        WHERE pc.pc_num = #{pcNum}
+    </select>
+
+    <!-- 🆕 게시글 작성자가 특정 댓글에 좋아요 눌렀는지 확인 -->
+    <select id="isLikedByPostAuthor" resultType="boolean">
+        SELECT CASE WHEN EXISTS(
+            SELECT 1
+            FROM post_comment_likes pcl
+            WHERE pcl.pc_num = #{pcNum}
+            AND pcl.m_id = (
+                SELECT p.m_id
+                FROM posts p
+                JOIN post_comments pc ON p.p_num = pc.p_num
+                WHERE pc.pc_num = #{pcNum}
+            )
+        ) THEN true ELSE false END
     </select>
 
 </mapper>
