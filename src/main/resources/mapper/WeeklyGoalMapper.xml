@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.with_walk.mapper.WeeklyGoalMapper">
+
+    <!-- 주간 목표 조회 (해당 주 월요일 기준) -->
+    <select id="getWeeklyGoal" parameterType="map" resultType="WeeklyGoalDTO">
+        SELECT wg_num, m_id, wg_goal_km, wg_start_date, wg_created_at, wg_updated_at
+        FROM weekly_goal
+        WHERE m_id = #{mId}
+          AND wg_start_date = #{startDate}
+        LIMIT 1
+    </select>
+
+    <!-- 주간 목표 등록 -->
+    <insert id="insertWeeklyGoal" parameterType="WeeklyGoalDTO">
+        INSERT INTO weekly_goal (m_id, wg_goal_km, wg_start_date)
+        VALUES (#{mId}, #{wgGoalKm}, #{wgStartDate})
+        ON DUPLICATE KEY UPDATE
+            wg_goal_km = #{wgGoalKm},
+            wg_updated_at = CURRENT_TIMESTAMP
+    </insert>
+
+    <!-- 주간 목표 수정 -->
+    <update id="updateWeeklyGoal" parameterType="WeeklyGoalDTO">
+        UPDATE weekly_goal
+        SET wg_goal_km = #{wgGoalKm},
+            wg_updated_at = CURRENT_TIMESTAMP
+        WHERE m_id = #{mId}
+          AND wg_start_date = #{wgStartDate}
+    </update>
+
+    <!-- 주간 목표 삭제 -->
+    <delete id="deleteWeeklyGoal" parameterType="map">
+        DELETE FROM weekly_goal
+        WHERE m_id = #{mId}
+          AND wg_start_date = #{startDate}
+    </delete>
+
+    <!-- 회원의 모든 주간 목표 조회 (히스토리) -->
+    <select id="getAllWeeklyGoals" parameterType="string" resultType="WeeklyGoalDTO">
+        SELECT wg_num, m_id, wg_goal_km, wg_start_date, wg_created_at, wg_updated_at
+        FROM weekly_goal
+        WHERE m_id = #{mId}
+        ORDER BY wg_start_date DESC
+    </select>
+
+</mapper>
