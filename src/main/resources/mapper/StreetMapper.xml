@@ -4,29 +4,32 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.with_walk.mapper.StreetMapper">
 
-	<insert id="registerStreet" parameterType="com.example.with_walk.dto.StreetDTO">
-		insert into
-			streets (m_id, r_start_time, r_end_time, r_distance, r_time, r_speed, r_kcal)
-		values
-			(#{m_id}, #{r_start_time}, #{r_end_time}, #{r_distance}, #{r_time}, #{r_speed}, #{r_kcal})
-	</insert>
+    <insert id="registerStreet" parameterType="com.example.with_walk.dto.StreetDTO">
+        insert into streets (
+            m_id, r_start_time, r_end_time, r_distance, r_time, r_speed, r_kcal
+        )
+        values (
+            #{mId}, #{rStartTime}, #{rEndTime}, #{rDistance}, #{rTime}, #{rSpeed}, #{rKcal}
+        )
+    </insert>
 
-	<select id="getStreetList">
-		select * from streets where m_id = #{m_id} and r_date LIKE CONCAT('%', #{r_date}, '%') and r_status = '공개'
-	</select>
+    <select id="getStreetList" resultType="com.example.with_walk.dto.StreetDTO">
+        select * from streets
+        where m_id = #{mId}
+          and r_date LIKE CONCAT('%', #{rDate}, '%')
+          and r_status = '공개'
+    </select>
 
+    <select id="getStreetAllList" resultType="com.example.with_walk.dto.StreetDTO">
+        select * from streets
+        where m_id = #{mId}
+          and r_status = '공개'
+    </select>
 
-	<select id="getStreetAllList">
-		select * from streets where m_id = #{m_id} and r_status = '공개'
-	</select>
-
-    <delete id="deleteStreet">
-		update
-			streets
-		set
-			r_status = '비공개'
-		where
-			r_num = #{r_num}
-	</delete>
+    <update id="deleteStreet">
+        update streets
+        set r_status = '비공개'
+        where r_num = #{rNum}
+    </update>
 
 </mapper>

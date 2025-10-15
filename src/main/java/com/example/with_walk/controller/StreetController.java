@@ -2,7 +2,6 @@ package com.example.with_walk.controller;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,31 +24,29 @@ public class StreetController {
     StreetService streetService;
 
     @PostMapping("/register")
-    public void registerStreet(@RequestBody StreetDTO streetVO) {
-        streetService.registerStreet(streetVO);
+    public void registerStreet(@RequestBody StreetDTO street) {
+        streetService.registerStreet(street);
         System.out.println("발자국 등록완료");
     }
 
     @GetMapping("/getlist")
-    public List<StreetDTO> getStreetList(@RequestParam("m_id") String m_id, @RequestParam("r_date") String r_date) {
-        List<StreetDTO> Street = streetService.getStreetList(m_id, r_date);
+    public List<StreetDTO> getStreetList(@RequestParam("mId") String mId, @RequestParam("rDate") String rDate) {
+        List<StreetDTO> streets = streetService.getStreetList(mId, rDate);
         System.out.println("발자국 불러오기 성공");
-        // log.info("기억 불러오기 성공: {}", Street);
-        return Street;
+        return streets;
     }
 
     @GetMapping("/getalllist")
-    public List<StreetDTO> getStreetList(@RequestParam("m_id") String m_id) {
-        List<StreetDTO> Street = streetService.getStreetAllList(m_id);
+    public List<StreetDTO> getStreetAllList(@RequestParam("mId") String mId) {
+        List<StreetDTO> streets = streetService.getStreetAllList(mId);
         System.out.println("발자국 불러오기 성공");
-        // log.info("기억 불러오기 성공: {}", Street);
-        return Street;
+        return streets;
     }
 
     @PostMapping("/delete")
-    public void deleteStreet(@Param("r_num") Integer r_num) {
+    public void deleteStreet(@RequestParam("rNum") Integer rNum) {
+        streetService.deleteStreet(rNum);
         System.out.println("발자국 삭제완료");
-        streetService.deleteStreet(r_num);
     }
 
 }

@@ -30,34 +30,32 @@ public class MemberController {
     }
 
     @GetMapping("/getUser")
-    public MemberDTO getUser(@RequestParam("m_id") String m_id, @RequestParam("m_password") String m_password) {
-        MemberDTO member = memberService.getUser(m_id, m_password);
+    public MemberDTO getUser(@RequestParam("mId") String mId, @RequestParam("mPassword") String mPassword) {
+        MemberDTO member = memberService.getUser(mId, mPassword);
+        System.out.println("id: " + mId + ", password: " + mPassword);
         System.out.println("회원 불러오기 성공");
-        // log.info("회원 불러오기 성공: {}", member);
+        log.info("회원 불러오기 성공: {}", member);
         return member;
     }
 
-    @GetMapping("/getUserdata")
-    public MemberDTO getUserData(@RequestParam("m_id") String m_id) {
-        MemberDTO member = memberService.getUserData(m_id);
+    @GetMapping("/getUserData")
+    public MemberDTO getUserData(@RequestParam("mId") String mId) {
+        MemberDTO member = memberService.getUserData(mId);
         System.out.println("회원 불러오기 성공");
-        // log.info("회원 불러오기 성공: {}", member);
         return member;
     }
 
     @GetMapping("/check")
-    public MemberDTO checkNick(@RequestParam("m_nickname") String m_nickname) {
-        MemberDTO member = memberService.checkNick(m_nickname);
+    public MemberDTO checkNick(@RequestParam("mNickname") String mNickname) {
+        MemberDTO member = memberService.checkNick(mNickname);
         System.out.println("회원 불러오기 성공");
-        // log.info("회원 불러오기 성공: {}", member);
         return member;
     }
 
     @GetMapping("/search")
-    public List<MemberDTO> searchNick(@RequestParam("m_nickname") String m_nickname) {
-        List<MemberDTO> member = memberService.searchNick(m_nickname);
+    public List<MemberDTO> searchNick(@RequestParam("mNickname") String mNickname) {
+        List<MemberDTO> member = memberService.searchNick(mNickname);
         System.out.println("회원 불러오기 성공");
-        // log.info("회원 불러오기 성공: {}", member);
         return member;
     }
 
@@ -67,16 +65,15 @@ public class MemberController {
     }
 
     @PostMapping("/delete")
-    public void deleteUser(@RequestParam("m_id") String m_id) {
+    public void deleteUser(@RequestParam("mId") String mId) {
         System.out.println("회원 삭제완료");
-        memberService.deleteUser(m_id);
+        memberService.deleteUser(mId);
     }
 
-    @PostMapping("/upprofile")
+    @PostMapping("/updateProfile")
     public void updateProfile(@RequestBody MemberDTO member) {
         memberService.updateProfile(member);
         System.out.println("프로필 수정 성공");
-        // log.info("프로필 수정 성공: {}", member);
     }
 
 }

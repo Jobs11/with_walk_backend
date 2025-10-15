@@ -4,14 +4,13 @@ import lombok.Data;
 
 @Data
 public class MemberDTO {
-    private Integer m_num;
-    private String m_name;
-    private String m_nickname;
-    private String m_email;
-    private String m_id;
-    private String m_password;
-    private String m_profile_image;
-    private String m_role;
-    private String m_create;
-
+    private Integer mNum; // m_num
+    private String mName; // m_name
+    private String mNickname; // m_nickname
+    private String mEmail; // m_email
+    private String mId; // m_id
+    private String mPassword; // m_password
+    private String mProfileImage; // m_profile_image
+    private String mRole; // m_role
+    private String mCreate; // m_create
 }

@@ -10,9 +10,9 @@ import com.example.with_walk.dto.StreetDTO;
 @Mapper
 public interface StreetMapper {
 
-    public List<StreetDTO> getStreetList(@Param("m_id") String m_id, @Param("r_date") String r_date);
+    public List<StreetDTO> getStreetList(@Param("mId") String m_id, @Param("rDate") String r_date);
 
-    public List<StreetDTO> getStreetAllList(@Param("m_id") String m_id);
+    public List<StreetDTO> getStreetAllList(@Param("mId") String m_id);
 
     public void registerStreet(StreetDTO streetVO);
 
