@@ -27,7 +27,7 @@
             pc.m_id,
             pc.pc_content,
             pc.pc_date,
-            m.m_name as author_name,
+            m.m_nickname as author_name,
             m.m_profile_image as author_image,
             COALESCE(COUNT(DISTINCT pcl.pcl_num), 0) as like_count,
             MAX(CASE WHEN pcl.m_id = #{mId} THEN 1 ELSE 0 END) as is_liked
@@ -69,7 +69,7 @@
             pc.m_id,
             pc.pc_content,
             pc.pc_date,
-            m.m_name as author_name,
+            m.m_nickname as author_name,
             m.m_profile_image as author_image,
             0 as like_count,
             0 as is_liked

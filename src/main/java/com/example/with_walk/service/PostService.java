@@ -28,5 +28,5 @@ public interface PostService {
     boolean toggleLike(Integer pNum, String userId);
 
     // 인기 게시글 조회
-    List<PostDTO> getPopularPosts(int limit);
+    List<PostDTO> getPopularPosts(String userId, int limit);
 }

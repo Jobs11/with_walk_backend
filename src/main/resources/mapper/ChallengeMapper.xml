@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.with_walk.mapper.ChallengeMapper">
+
+    <select id="selectActiveChallenges" resultType="com.example.with_walk.dto.ChallengeDTO">
+        SELECT
+            c.*,
+            COALESCE(COUNT(DISTINCT cp.cp_num), 0) as participant_count,
+            DATEDIFF(c.c_end_date, NOW()) as days_left,
+            EXISTS(
+                SELECT 1 FROM challenge_participants
+                WHERE c_num = c.c_num AND m_id = #{userId} AND cp_status = '진행중'
+            ) as is_joined,
+            COALESCE(
+                (SELECT cp_current_value FROM challenge_participants
+                 WHERE c_num = c.c_num AND m_id = #{userId} AND cp_status = '진행중'),
+                0
+            ) as current_value,
+            COALESCE(
+                (SELECT cp_current_value FROM challenge_participants
+                 WHERE c_num = c.c_num AND m_id = #{userId} AND cp_status = '진행중')
+                / c.c_target_value,
+                0
+            ) as progress
+        FROM challenges c
+        LEFT JOIN challenge_participants cp ON c.c_num = cp.c_num
+        WHERE c.c_status = '진행중'
+          AND c.c_end_date >= NOW()
+        GROUP BY c.c_num
+        ORDER BY c.c_created_at DESC
+    </select>
+
+    <select id="selectChallengeById" resultType="com.example.with_walk.dto.ChallengeDTO">
+        SELECT
+            c.*,
+            COALESCE(COUNT(DISTINCT cp.cp_num), 0) as participant_count,
+            DATEDIFF(c.c_end_date, NOW()) as days_left,
+            EXISTS(
+                SELECT 1 FROM challenge_participants
+                WHERE c_num = c.c_num AND m_id = #{userId}
+            ) as is_joined
+        FROM challenges c
+        LEFT JOIN challenge_participants cp ON c.c_num = cp.c_num
+        WHERE c.c_num = #{cNum}
+        GROUP BY c.c_num
+    </select>
+
+    <insert id="insertParticipant" parameterType="com.example.with_walk.dto.ChallengeParticipantDTO">
+        INSERT INTO challenge_participants (c_num, m_id, cp_status, cp_current_value)
+        VALUES (#{cNum}, #{mId}, #{cpStatus}, #{cpCurrentValue})
+    </insert>
+
+    <select id="selectParticipantByUserAndChallenge" resultType="com.example.with_walk.dto.ChallengeParticipantDTO">
+        SELECT * FROM challenge_participants
+        WHERE c_num = #{cNum} AND m_id = #{userId}
+    </select>
+
+    <select id="selectMyActiveChallenges" resultType="com.example.with_walk.dto.ChallengeParticipantDTO">
+        SELECT
+            cp.*,
+            c.c_title,
+            c.c_reward,
+            c.c_target_value,
+            c.c_unit
+        FROM challenge_participants cp
+        JOIN challenges c ON cp.c_num = c.c_num
+        WHERE cp.m_id = #{userId}
+          AND cp.cp_status = '진행중'
+        ORDER BY cp.cp_join_date DESC
+    </select>
+
+    <select id="selectMyCompletedChallenges" resultType="com.example.with_walk.dto.ChallengeParticipantDTO">
+        SELECT
+            cp.*,
+            c.c_title,
+            c.c_reward,
+            c.c_target_value,
+            c.c_unit
+        FROM challenge_participants cp
+        JOIN challenges c ON cp.c_num = c.c_num
+        WHERE cp.m_id = #{userId}
+          AND cp.cp_status = '완료'
+        ORDER BY cp.cp_completed_date DESC
+    </select>
+
+    <update id="updateChallengeProgress">
+        UPDATE challenge_participants
+        SET cp_current_value = #{value}
+        WHERE cp_num = #{cpNum}
+    </update>
+
+    <update id="updateChallengeComplete">
+        UPDATE challenge_participants
+        SET cp_status = '완료',
+            cp_completed_date = NOW()
+        WHERE cp_num = #{cpNum}
+    </update>
+
+    <insert id="insertBadge" parameterType="com.example.with_walk.dto.BadgeDTO">
+        INSERT INTO member_badges (m_id, c_num, mb_badge_name)
+        VALUES (#{mId}, #{cNum}, #{mbBadgeName})
+    </insert>
+
+    <select id="selectMyBadges" resultType="com.example.with_walk.dto.BadgeDTO">
+        SELECT
+            mb.*,
+            c.c_title,
+            c.c_description
+        FROM member_badges mb
+        JOIN challenges c ON mb.c_num = c.c_num
+        WHERE mb.m_id = #{userId}
+        ORDER BY mb.mb_earned_date DESC
+    </select>
+
+    <select id="selectParticipantCount" resultType="int">
+        SELECT COUNT(*) FROM challenge_participants
+        WHERE c_num = #{cNum}
+    </select>
+
+</mapper>

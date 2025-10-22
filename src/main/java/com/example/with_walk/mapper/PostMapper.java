@@ -50,5 +50,5 @@ public interface PostMapper {
                         @Param("increment") boolean increment);
 
         // 인기 게시글 조회
-        List<PostDTO> selectPopularPosts(@Param("limit") int limit);
+        List<PostDTO> selectPopularPosts(@Param("userId") String userId, @Param("limit") int limit);
 }

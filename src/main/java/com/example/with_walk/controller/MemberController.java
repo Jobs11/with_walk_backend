@@ -48,14 +48,15 @@ public class MemberController {
     @GetMapping("/check")
     public MemberDTO checkNick(@RequestParam("mNickname") String mNickname) {
         MemberDTO member = memberService.checkNick(mNickname);
-        System.out.println("회원 불러오기 성공");
+        System.out.println("닉네임 체크 성공");
         return member;
     }
 
     @GetMapping("/search")
     public List<MemberDTO> searchNick(@RequestParam("mNickname") String mNickname) {
         List<MemberDTO> member = memberService.searchNick(mNickname);
-        System.out.println("회원 불러오기 성공");
+        System.out.println("닉네임 불러오기 성공");
+        log.info("닉네임 불러오기 성공: {}", member);
         return member;
     }
 

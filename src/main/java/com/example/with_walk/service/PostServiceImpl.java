@@ -100,7 +100,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDTO> getPopularPosts(int limit) {
-        return postMapper.selectPopularPosts(limit);
+    public List<PostDTO> getPopularPosts(String userId, int limit) {
+        return postMapper.selectPopularPosts(userId, limit);
     }
 }

@@ -142,6 +142,7 @@ public class FriendController {
     public ResponseEntity<?> getFollowers(@PathVariable String userId) {
         try {
             List<FriendshipDTO> followers = friendService.getFollowers(userId);
+            System.out.println("Followers: " + followers);
             return ResponseEntity.ok(followers);
         } catch (Exception e) {
             e.printStackTrace();
@@ -158,6 +159,7 @@ public class FriendController {
     public ResponseEntity<?> getFollowing(@PathVariable String userId) {
         try {
             List<FriendshipDTO> following = friendService.getFollowing(userId);
+            System.out.println("following: " + following);
             return ResponseEntity.ok(following);
         } catch (Exception e) {
             e.printStackTrace();

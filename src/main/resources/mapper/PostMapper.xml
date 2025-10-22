@@ -40,7 +40,7 @@
     <select id="selectAllFeeds" resultMap="PostResultMap">
         SELECT
             p.*,
-            m.m_name as author_name,
+            m.m_nickname as author_name,
             m.m_profile_image as author_image,
             COALESCE(COUNT(DISTINCT pl.pl_num), 0) as like_count,
             COALESCE(COUNT(DISTINCT pc.pc_num), 0) as comment_count,
@@ -62,7 +62,7 @@
     <select id="selectFriendFeeds" resultMap="PostResultMap">
         SELECT
             p.*,
-            m.m_name as author_name,
+            m.m_nickname as author_name,
             m.m_profile_image as author_image,
             COALESCE(COUNT(DISTINCT pl.pl_num), 0) as like_count,
             COALESCE(COUNT(DISTINCT pc.pc_num), 0) as comment_count,
@@ -93,7 +93,7 @@
     <select id="selectPostById" resultMap="PostResultMap">
         SELECT
             p.*,
-            m.m_name as author_name,
+            m.m_nickname as author_name,
             m.m_profile_image as author_image,
             COALESCE(COUNT(DISTINCT pl.pl_num), 0) as like_count,
             COALESCE(COUNT(DISTINCT pc.pc_num), 0) as comment_count,
@@ -147,12 +147,20 @@
     <select id="selectPopularPosts" resultMap="PostResultMap">
         SELECT
             p.*,
-            m.m_name as author_name,
-            COALESCE(COUNT(DISTINCT pl.pl_num), 0) as like_count
+            m.m_nickname as author_name,
+            m.m_profile_image as author_image,
+            COALESCE(COUNT(DISTINCT pl.pl_num), 0) as like_count,
+            COALESCE(COUNT(DISTINCT pc.pc_num), 0) as comment_count,
+            EXISTS(
+                SELECT 1 FROM post_likes
+                WHERE p_num = p.p_num AND m_id = #{userId}
+            ) as is_liked_by_user
         FROM posts p
         LEFT JOIN members m ON p.m_id = m.m_id
         LEFT JOIN post_likes pl ON p.p_num = pl.p_num
+        LEFT JOIN post_comments pc ON p.p_num = pc.p_num
         WHERE p.p_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        AND p.p_status = '공개'
         GROUP BY p.p_num
         ORDER BY like_count DESC
         LIMIT #{limit}

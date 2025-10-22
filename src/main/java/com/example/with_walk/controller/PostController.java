@@ -101,14 +101,15 @@ public class PostController {
      */
     @GetMapping("/feeds")
     public ResponseEntity<?> getFeeds(
-            @RequestParam(value = "user_id", required = false) String userId,
+            @RequestParam(value = "user_id") String userId,
+            @RequestParam(value = "style", required = false) String style,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
 
         try {
             List<PostDTO> feeds;
             System.out.println("게시글 접속완료");
-            if (userId != null && !userId.isEmpty()) {
+            if (style.equals("friends")) {
                 // 친구 피드
                 feeds = postService.getFriendFeeds(userId, page, size);
             } else {
@@ -206,10 +207,11 @@ public class PostController {
      */
     @GetMapping("/popular")
     public ResponseEntity<?> getPopularPosts(
+            @RequestParam("user_id") String userId,
             @RequestParam(value = "limit", defaultValue = "10") int limit) {
 
         try {
-            List<PostDTO> posts = postService.getPopularPosts(limit);
+            List<PostDTO> posts = postService.getPopularPosts(userId, limit);
             return ResponseEntity.ok(posts);
 
         } catch (Exception e) {
