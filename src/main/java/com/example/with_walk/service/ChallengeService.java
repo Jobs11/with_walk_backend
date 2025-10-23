@@ -21,4 +21,13 @@ public interface ChallengeService {
     boolean updateChallengeProgress(String userId, double distance);
 
     List<BadgeDTO> getMyBadges(String userId);
+
+    // 챌린지 생성
+    boolean createChallenge(ChallengeDTO challengeDTO);
+
+    // 챌린지 수정
+    boolean updateChallenge(ChallengeDTO challengeDTO);
+
+    // 챌린지 삭제
+    boolean deleteChallenge(Integer cNum);
 }

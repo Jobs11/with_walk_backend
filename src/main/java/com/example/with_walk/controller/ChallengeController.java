@@ -2,10 +2,14 @@ package com.example.with_walk.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -77,5 +81,64 @@ public class ChallengeController {
             @RequestParam("user_id") String userId) {
         List<BadgeDTO> badges = challengeService.getMyBadges(userId);
         return ResponseEntity.ok(badges);
+    }
+
+    // 챌린지 생성 (관리자용)
+    @PostMapping("/create")
+    public ResponseEntity<?> createChallenge(@RequestBody ChallengeDTO challengeDTO) {
+        try {
+            System.out.println("📝 챌린지 생성 요청: " + challengeDTO.getCTitle());
+
+            boolean success = challengeService.createChallenge(challengeDTO);
+
+            if (success) {
+                return ResponseEntity.ok("챌린지 생성 완료");
+            } else {
+                return ResponseEntity.badRequest().body("챌린지 생성 실패");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("오류 발생: " + e.getMessage());
+        }
+    }
+
+    // 챌린지 수정 (관리자용)
+    @PutMapping("/{cNum}")
+    public ResponseEntity<?> updateChallenge(
+            @PathVariable Integer cNum,
+            @RequestBody ChallengeDTO challengeDTO) {
+        try {
+            challengeDTO.setCNum(cNum);
+            boolean success = challengeService.updateChallenge(challengeDTO);
+
+            if (success) {
+                return ResponseEntity.ok("챌린지 수정 완료");
+            } else {
+                return ResponseEntity.badRequest().body("챌린지 수정 실패");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("오류 발생: " + e.getMessage());
+        }
+    }
+
+    // 챌린지 삭제 (관리자용)
+    @DeleteMapping("/{cNum}")
+    public ResponseEntity<?> deleteChallenge(@PathVariable Integer cNum) {
+        try {
+            boolean success = challengeService.deleteChallenge(cNum);
+
+            if (success) {
+                return ResponseEntity.ok("챌린지 삭제 완료");
+            } else {
+                return ResponseEntity.badRequest().body("챌린지 삭제 실패");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("오류 발생: " + e.getMessage());
+        }
     }
 }

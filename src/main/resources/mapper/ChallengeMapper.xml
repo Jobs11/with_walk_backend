@@ -119,4 +119,59 @@
         WHERE c_num = #{cNum}
     </select>
 
+
+    <!-- 챌린지 생성 -->
+    <insert id="insertChallenge" parameterType="com.example.with_walk.dto.ChallengeDTO">
+        INSERT INTO challenges (
+            c_title,
+            c_description,
+            c_type,
+            c_target_value,
+            c_unit,
+            c_start_date,
+            c_end_date,
+            c_reward,
+            c_status
+        ) VALUES (
+            #{cTitle},
+            #{cDescription},
+            #{cType},
+            #{cTargetValue},
+            #{cUnit},
+            #{cStartDate},
+            #{cEndDate},
+            #{cReward},
+            #{cStatus}
+        )
+    </insert>
+
+    <!-- 챌린지 수정 -->
+    <update id="updateChallenge" parameterType="com.example.with_walk.dto.ChallengeDTO">
+        UPDATE challenges
+        SET c_title = #{cTitle},
+            c_description = #{cDescription},
+            c_type = #{cType},
+            c_target_value = #{cTargetValue},
+            c_unit = #{cUnit},
+            c_start_date = #{cStartDate},
+            c_end_date = #{cEndDate},
+            c_reward = #{cReward},
+            c_status = #{cStatus}
+        WHERE c_num = #{cNum}
+    </update>
+
+    <!-- 챌린지 삭제 -->
+    <delete id="deleteChallenge">
+        DELETE FROM challenges
+        WHERE c_num = #{cNum}
+    </delete>
+
+    <!-- 챌린지 참가자 삭제 -->
+    <delete id="deleteParticipantsByChallenge">
+        DELETE FROM challenge_participants
+        WHERE c_num = #{cNum}
+    </delete>
+
+
+
 </mapper>

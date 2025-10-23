@@ -90,4 +90,24 @@ public class ChallengeServiceImpl implements ChallengeService {
     public List<BadgeDTO> getMyBadges(String userId) {
         return challengeMapper.selectMyBadges(userId);
     }
+
+    @Override
+    @Transactional
+    public boolean createChallenge(ChallengeDTO challengeDTO) {
+        return challengeMapper.insertChallenge(challengeDTO) > 0;
+    }
+
+    @Override
+    @Transactional
+    public boolean updateChallenge(ChallengeDTO challengeDTO) {
+        return challengeMapper.updateChallenge(challengeDTO) > 0;
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteChallenge(Integer cNum) {
+        // 참가자 데이터도 함께 삭제
+        challengeMapper.deleteParticipantsByChallenge(cNum);
+        return challengeMapper.deleteChallenge(cNum) > 0;
+    }
 }
