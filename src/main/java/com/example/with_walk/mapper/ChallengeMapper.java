@@ -49,4 +49,7 @@ public interface ChallengeMapper {
 
         // 챌린지 참가자 삭제
         int deleteParticipantsByChallenge(@Param("cNum") Integer cNum);
+
+        // 만료된 챌린지 자동 종료
+        int updateExpiredChallenges();
 }

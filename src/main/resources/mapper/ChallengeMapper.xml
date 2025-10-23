@@ -172,6 +172,13 @@
         WHERE c_num = #{cNum}
     </delete>
 
-
+    <!-- 만료된 챌린지 자동 종료 -->
+    <update id="updateExpiredChallenges">
+        UPDATE challenges
+        SET c_status = '종료',
+            c_updated_at = NOW()
+        WHERE c_status = '진행중'
+        AND c_end_date &lt; NOW()
+    </update>
 
 </mapper>
