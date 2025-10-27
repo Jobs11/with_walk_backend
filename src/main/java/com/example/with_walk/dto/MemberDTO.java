@@ -1,8 +1,14 @@
 package com.example.with_walk.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor // ✅ 전체 매개변수 생성자 추가 (Builder가 이것을 사용)
 public class MemberDTO {
     private Integer mNum; // m_num
     private String mName; // m_name

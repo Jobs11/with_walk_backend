@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -83,6 +84,78 @@ public class CustomerCenterController {
             NoticeDTO notice = customerService.getNoticeDetail(noticeId);
             if (notice != null) {
                 return ResponseEntity.ok(notice);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("공지사항을 찾을 수 없습니다");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("오류 발생: " + e.getMessage());
+        }
+    }
+
+    /**
+     * ✅ 공지사항 등록 (관리자용)
+     * POST /customer/notices
+     */
+    @PostMapping("/notices")
+    public ResponseEntity<?> createNotice(@RequestBody NoticeDTO notice) {
+        try {
+            int result = customerService.insertNotice(notice);
+
+            if (result > 0) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "공지사항이 등록되었습니다");
+                response.put("notice_id", notice.getNoticeId());
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("공지사항 등록에 실패했습니다");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("오류 발생: " + e.getMessage());
+        }
+    }
+
+    /**
+     * ✅ 공지사항 수정 (관리자용)
+     * PUT /customer/notices/{noticeId}
+     */
+    @PutMapping("/notices/{noticeId}")
+    public ResponseEntity<?> updateNotice(
+            @PathVariable Integer noticeId,
+            @RequestBody NoticeDTO notice) {
+        try {
+            notice.setNoticeId(noticeId);
+            int result = customerService.updateNotice(notice);
+
+            if (result > 0) {
+                return ResponseEntity.ok("공지사항이 수정되었습니다");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("공지사항을 찾을 수 없습니다");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("오류 발생: " + e.getMessage());
+        }
+    }
+
+    /**
+     * ✅ 공지사항 삭제 (관리자용)
+     * DELETE /customer/notices/{noticeId}
+     */
+    @DeleteMapping("/notices/{noticeId}")
+    public ResponseEntity<?> deleteNotice(@PathVariable Integer noticeId) {
+        try {
+            int result = customerService.deleteNotice(noticeId);
+
+            if (result > 0) {
+                return ResponseEntity.ok("공지사항이 삭제되었습니다");
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("공지사항을 찾을 수 없습니다");

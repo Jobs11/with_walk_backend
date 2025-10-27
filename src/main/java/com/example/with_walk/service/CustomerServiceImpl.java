@@ -44,6 +44,24 @@ public class CustomerServiceImpl implements CustomerService {
         return noticeMapper.selectNoticeById(noticeId);
     }
 
+    // ✅ 공지사항 등록
+    @Override
+    public int insertNotice(NoticeDTO notice) {
+        return noticeMapper.insertNotice(notice);
+    }
+
+    // ✅ 공지사항 수정
+    @Override
+    public int updateNotice(NoticeDTO notice) {
+        return noticeMapper.updateNotice(notice);
+    }
+
+    // ✅ 공지사항 삭제
+    @Override
+    public int deleteNotice(Integer noticeId) {
+        return noticeMapper.deleteNotice(noticeId);
+    }
+
     // ========== FAQ ==========
     @Override
     public List<FaqDTO> getAllFaqs() {

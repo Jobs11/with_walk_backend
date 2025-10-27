@@ -2,6 +2,7 @@ package com.example.with_walk.service;
 
 import java.util.List;
 
+import com.example.with_walk.dto.RankingDTO;
 import com.example.with_walk.dto.StreetDTO;
 
 public interface StreetService {
@@ -13,4 +14,5 @@ public interface StreetService {
 
     public void deleteStreet(Integer r_num);
 
+    List<RankingDTO> getWeeklyTop3();
 }

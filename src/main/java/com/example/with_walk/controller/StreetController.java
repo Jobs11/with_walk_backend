@@ -3,6 +3,7 @@ package com.example.with_walk.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.with_walk.dto.RankingDTO;
 import com.example.with_walk.dto.StreetDTO;
 import com.example.with_walk.service.StreetService;
 
@@ -49,4 +51,9 @@ public class StreetController {
         System.out.println("발자국 삭제완료");
     }
 
+    @GetMapping("/ranking/weekly/top3")
+    public ResponseEntity<List<RankingDTO>> getWeeklyTop3() {
+        List<RankingDTO> ranking = streetService.getWeeklyTop3();
+        return ResponseEntity.ok(ranking);
+    }
 }

@@ -4,6 +4,20 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.with_walk.mapper.StreetMapper">
 
+    <!-- ✅ ResultMap 추가 -->
+    <resultMap id="StreetResultMap" type="com.example.with_walk.dto.StreetDTO">
+        <result property="mId" column="m_id" javaType="String"/>
+        <result property="rNum" column="r_num" javaType="Integer"/>
+        <result property="rDate" column="r_date" javaType="java.sql.Timestamp"/>
+        <result property="rStartTime" column="r_start_time" javaType="java.time.LocalDateTime"/>
+        <result property="rEndTime" column="r_end_time" javaType="java.time.LocalDateTime"/>
+        <result property="rDistance" column="r_distance" javaType="Double"/>
+        <result property="rTime" column="r_time" javaType="String"/>
+        <result property="rSpeed" column="r_speed" javaType="Double"/>
+        <result property="rKcal" column="r_kcal" javaType="Integer"/>
+        <result property="rStatus" column="r_status" javaType="String"/>
+    </resultMap>
+
     <insert id="registerStreet" parameterType="com.example.with_walk.dto.StreetDTO">
         insert into streets (
             m_id, r_start_time, r_end_time, r_distance, r_time, r_speed, r_kcal
@@ -13,14 +27,16 @@
         )
     </insert>
 
-    <select id="getStreetList" resultType="com.example.with_walk.dto.StreetDTO">
+    <!-- ✅ resultType 대신 resultMap 사용 -->
+    <select id="getStreetList" resultMap="StreetResultMap">
         select * from streets
         where m_id = #{mId}
           and r_date LIKE CONCAT('%', #{rDate}, '%')
           and r_status = '공개'
     </select>
 
-    <select id="getStreetAllList" resultType="com.example.with_walk.dto.StreetDTO">
+    <!-- ✅ resultType 대신 resultMap 사용 -->
+    <select id="getStreetAllList" resultMap="StreetResultMap">
         select * from streets
         where m_id = #{mId}
           and r_status = '공개'
@@ -32,4 +48,22 @@
         where r_num = #{rNum}
     </update>
 
+    <!-- StreetMapper.xml -->
+    <select id="getWeeklyTop3" resultType="com.example.with_walk.dto.RankingDTO">
+        <![CDATA[
+            SELECT
+                s.m_id as mId,
+                m.m_name as mName,
+                SUM(s.r_distance) as totalDistance,
+                ROW_NUMBER() OVER (ORDER BY SUM(s.r_distance) DESC) as `rank`
+            FROM streets s
+            INNER JOIN members m ON s.m_id = m.m_id
+            WHERE s.r_date >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+            AND s.r_date < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
+            AND s.r_status = '공개'
+            GROUP BY s.m_id, m.m_name
+            ORDER BY totalDistance DESC
+            LIMIT 3
+        ]]>
+    </select>
 </mapper>

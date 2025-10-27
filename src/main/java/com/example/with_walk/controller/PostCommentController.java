@@ -22,7 +22,9 @@ import com.example.with_walk.dto.PostCommentDTO;
 import com.example.with_walk.service.PostCommentService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/withwalk/post/")
 @RequiredArgsConstructor
@@ -41,6 +43,7 @@ public class PostCommentController {
             @RequestParam(name = "m_id", required = false) String mId) {
         try {
             List<PostCommentDTO> comments = commentService.getComments(pNum, mId);
+            log.info("댓글 불러오기 성공: {}", comments);
             return ResponseEntity.ok(comments);
         } catch (Exception e) {
             e.printStackTrace();

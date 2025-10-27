@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.with_walk.dto.RankingDTO;
 import com.example.with_walk.dto.StreetDTO;
 import com.example.with_walk.mapper.StreetMapper;
 
@@ -35,4 +36,8 @@ public class StreetServiceimpl implements StreetService {
         System.out.println("발자국삭제 " + r_num);
     }
 
+    @Override
+    public List<RankingDTO> getWeeklyTop3() {
+        return streetMapper.getWeeklyTop3();
+    }
 }

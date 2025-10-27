@@ -16,6 +16,15 @@ public interface CustomerService {
 
     NoticeDTO getNoticeDetail(Integer noticeId);
 
+    // ✅ 새로 추가
+    int insertNotice(NoticeDTO notice);
+
+    // ✅ 새로 추가
+    int updateNotice(NoticeDTO notice);
+
+    // ✅ 새로 추가
+    int deleteNotice(Integer noticeId);
+
     // FAQ
     List<FaqDTO> getAllFaqs();
 
