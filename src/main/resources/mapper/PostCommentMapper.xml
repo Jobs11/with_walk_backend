@@ -8,14 +8,16 @@
     <resultMap id="PostCommentResultMap" type="com.example.with_walk.dto.PostCommentDTO">
         <id property="pcNum" column="pc_num"/>
         <result property="pNum" column="p_num"/>
+        <result property="parentPcNum" column="parent_pc_num"/>  <!-- ✅ 추가 -->
         <result property="mId" column="m_id"/>
         <result property="pcContent" column="pc_content"/>
         <result property="pcDate" column="pc_date"/>
         <result property="authorName" column="author_name"/>
         <result property="authorImage" column="author_image"/>
+        <result property="mNickname" column="m_nickname"/>  <!-- ✅ 추가 -->
+        <result property="mProfileImage" column="m_profile_image"/>  <!-- ✅ 추가 -->
         <result property="isLiked" column="is_liked"/>
         <result property="likeCount" column="like_count"/>
-        <!-- 🔴 핵심: 명시적으로 매핑! -->
         <result property="isLikedByAuthor" column="is_liked_by_author"/>
     </resultMap>
 
@@ -24,11 +26,14 @@
         SELECT
             pc.pc_num,
             pc.p_num,
+            pc.parent_pc_num,  <!-- ✅ 추가 -->
             pc.m_id,
             pc.pc_content,
             pc.pc_date,
             m.m_nickname as author_name,
             m.m_profile_image as author_image,
+            m.m_nickname as m_nickname,  <!-- ✅ 추가 -->
+            m.m_profile_image as m_profile_image,  <!-- ✅ 추가 -->
             COALESCE(COUNT(DISTINCT pcl.pcl_num), 0) as like_count,
             MAX(CASE WHEN pcl.m_id = #{mId} THEN 1 ELSE 0 END) as is_liked
         FROM post_comments pc
@@ -36,16 +41,19 @@
         LEFT JOIN post_comment_likes pcl ON pc.pc_num = pcl.pc_num
         WHERE pc.p_num = #{pNum}
         AND pc.pc_status = '공개'
-        GROUP BY pc.pc_num, pc.p_num, pc.m_id, pc.pc_content, pc.pc_date,
-                 m.m_name, m.m_profile_image
-        ORDER BY pc.pc_date DESC
+        GROUP BY pc.pc_num, pc.p_num, pc.parent_pc_num, pc.m_id, pc.pc_content, pc.pc_date,
+                 m.m_nickname, m.m_profile_image
+        ORDER BY
+            COALESCE(pc.parent_pc_num, pc.pc_num),  <!-- ✅ 계층 정렬 -->
+            pc.parent_pc_num IS NULL DESC,
+            pc.pc_date ASC
     </select>
 
     <!-- 댓글 작성 -->
     <insert id="insertComment" parameterType="com.example.with_walk.dto.PostCommentDTO"
             useGeneratedKeys="true" keyProperty="pcNum">
-        INSERT INTO post_comments (p_num, m_id, pc_content, pc_date)
-        VALUES (#{pNum}, #{mId}, #{pcContent}, #{pcDate})
+        INSERT INTO post_comments (p_num, parent_pc_num, m_id, pc_content, pc_date)  <!-- ✅ parent_pc_num 추가 -->
+        VALUES (#{pNum}, #{parentPcNum}, #{mId}, #{pcContent}, #{pcDate})
     </insert>
 
     <!-- 댓글 삭제 -->
@@ -66,11 +74,14 @@
         SELECT
             pc.pc_num,
             pc.p_num,
+            pc.parent_pc_num,  <!-- ✅ 추가 -->
             pc.m_id,
             pc.pc_content,
             pc.pc_date,
             m.m_nickname as author_name,
             m.m_profile_image as author_image,
+            m.m_nickname as m_nickname,  <!-- ✅ 추가 -->
+            m.m_profile_image as m_profile_image,  <!-- ✅ 추가 -->
             0 as like_count,
             0 as is_liked
         FROM post_comments pc
@@ -78,16 +89,19 @@
         WHERE pc.pc_num = #{pcNum}
     </select>
 
-    <!-- 🔴 수정된 getCommentList - resultMap 사용 -->
+    <!-- 🔴 수정된 getCommentList - resultMap 사용 + parent_pc_num 추가 -->
     <select id="getCommentList" resultMap="PostCommentResultMap">
         SELECT
             pc.pc_num,
             pc.p_num,
+            pc.parent_pc_num,  <!-- ✅ 추가 -->
             pc.m_id,
             pc.pc_content,
             pc.pc_date,
             m.m_nickname as author_name,
             m.m_profile_image as author_image,
+            m.m_nickname as m_nickname,  <!-- ✅ 추가 -->
+            m.m_profile_image as m_profile_image,  <!-- ✅ 추가 -->
 
             -- 현재 사용자가 좋아요 눌렀는지
             CASE WHEN pcl.m_id IS NOT NULL THEN true ELSE false END as is_liked,
@@ -114,7 +128,11 @@
         LEFT JOIN post_comment_likes pcl ON pc.pc_num = pcl.pc_num
             AND pcl.m_id = #{user_id}
         WHERE pc.p_num = #{pNum}
-        ORDER BY pc.pc_date DESC
+        AND pc.pc_status = '공개'  <!-- ✅ 추가 -->
+        ORDER BY
+            COALESCE(pc.parent_pc_num, pc.pc_num),  <!-- ✅ 계층 정렬 -->
+            pc.parent_pc_num IS NULL DESC,
+            pc.pc_date ASC
     </select>
 
     <!-- 단일 댓글 조회 쿼리 추가 -->
@@ -122,11 +140,14 @@
         SELECT
             pc.pc_num,
             pc.p_num,
+            pc.parent_pc_num,  <!-- ✅ 추가 -->
             pc.m_id,
             pc.pc_content,
             pc.pc_date,
             m.m_nickname as author_name,
             m.m_profile_image as author_image,
+            m.m_nickname as m_nickname,  <!-- ✅ 추가 -->
+            m.m_profile_image as m_profile_image,  <!-- ✅ 추가 -->
 
             -- 현재 사용자가 좋아요 눌렀는지
             CASE WHEN pcl.m_id IS NOT NULL THEN true ELSE false END as is_liked,
@@ -168,6 +189,95 @@
                 WHERE pc.pc_num = #{pcNum}
             )
         ) THEN true ELSE false END
+    </select>
+
+    <!-- ✅ 추가: 대댓글만 조회 (특정 부모 댓글의) -->
+    <select id="selectRepliesByParentPcNum" resultMap="PostCommentResultMap">
+        SELECT
+            pc.pc_num,
+            pc.p_num,
+            pc.parent_pc_num,
+            pc.m_id,
+            pc.pc_content,
+            pc.pc_date,
+            m.m_nickname as author_name,
+            m.m_profile_image as author_image,
+            m.m_nickname as m_nickname,
+            m.m_profile_image as m_profile_image,
+
+            CASE WHEN pcl.m_id IS NOT NULL THEN true ELSE false END as is_liked,
+
+            (SELECT COUNT(*)
+             FROM post_comment_likes
+             WHERE pc_num = pc.pc_num) as like_count,
+
+            CASE WHEN EXISTS(
+                SELECT 1
+                FROM post_comment_likes pcl2
+                WHERE pcl2.pc_num = pc.pc_num
+                AND pcl2.m_id = (
+                    SELECT p.m_id
+                    FROM posts p
+                    WHERE p.p_num = pc.p_num
+                )
+            ) THEN true ELSE false END as is_liked_by_author
+
+        FROM post_comments pc
+        LEFT JOIN members m ON pc.m_id = m.m_id
+        LEFT JOIN post_comment_likes pcl ON pc.pc_num = pcl.pc_num
+            AND pcl.m_id = #{user_id}
+        WHERE pc.parent_pc_num = #{parentPcNum}
+        AND pc.pc_status = '공개'
+        ORDER BY pc.pc_date ASC
+    </select>
+
+    <!-- ✅ 추가: 부모 댓글만 조회 -->
+    <select id="selectParentComments" resultMap="PostCommentResultMap">
+        SELECT
+            pc.pc_num,
+            pc.p_num,
+            pc.parent_pc_num,
+            pc.m_id,
+            pc.pc_content,
+            pc.pc_date,
+            m.m_nickname as author_name,
+            m.m_profile_image as author_image,
+            m.m_nickname as m_nickname,
+            m.m_profile_image as m_profile_image,
+
+            CASE WHEN pcl.m_id IS NOT NULL THEN true ELSE false END as is_liked,
+
+            (SELECT COUNT(*)
+             FROM post_comment_likes
+             WHERE pc_num = pc.pc_num) as like_count,
+
+            CASE WHEN EXISTS(
+                SELECT 1
+                FROM post_comment_likes pcl2
+                WHERE pcl2.pc_num = pc.pc_num
+                AND pcl2.m_id = (
+                    SELECT p.m_id
+                    FROM posts p
+                    WHERE p.p_num = pc.p_num
+                )
+            ) THEN true ELSE false END as is_liked_by_author
+
+        FROM post_comments pc
+        LEFT JOIN members m ON pc.m_id = m.m_id
+        LEFT JOIN post_comment_likes pcl ON pc.pc_num = pcl.pc_num
+            AND pcl.m_id = #{user_id}
+        WHERE pc.p_num = #{pNum}
+        AND pc.parent_pc_num IS NULL  <!-- ✅ 부모 댓글만 -->
+        AND pc.pc_status = '공개'
+        ORDER BY pc.pc_date DESC
+    </select>
+
+    <!-- ✅ 추가: 특정 댓글의 대댓글 수 조회 -->
+    <select id="countRepliesByParentPcNum" resultType="int">
+        SELECT COUNT(*)
+        FROM post_comments
+        WHERE parent_pc_num = #{parentPcNum}
+        AND pc_status = '공개'
     </select>
 
 </mapper>
