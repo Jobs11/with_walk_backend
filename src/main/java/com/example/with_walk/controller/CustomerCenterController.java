@@ -240,6 +240,78 @@ public class CustomerCenterController {
         }
     }
 
+    /**
+     * ✅ FAQ 등록 (관리자용)
+     * POST /customer/faqs
+     */
+    @PostMapping("/faqs")
+    public ResponseEntity<?> createFaq(@RequestBody FaqDTO faq) {
+        try {
+            int result = customerService.insertFaq(faq);
+
+            if (result > 0) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "FAQ가 등록되었습니다");
+                response.put("faq_id", faq.getFaqId());
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("FAQ 등록에 실패했습니다");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("오류 발생: " + e.getMessage());
+        }
+    }
+
+    /**
+     * ✅ FAQ 수정 (관리자용)
+     * PUT /customer/faqs/{faqId}
+     */
+    @PutMapping("/faqs/{faqId}")
+    public ResponseEntity<?> updateFaq(
+            @PathVariable Integer faqId,
+            @RequestBody FaqDTO faq) {
+        try {
+            faq.setFaqId(faqId);
+            int result = customerService.updateFaq(faq);
+
+            if (result > 0) {
+                return ResponseEntity.ok("FAQ가 수정되었습니다");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("FAQ를 찾을 수 없습니다");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("오류 발생: " + e.getMessage());
+        }
+    }
+
+    /**
+     * ✅ FAQ 삭제 (관리자용)
+     * DELETE /customer/faqs/{faqId}
+     */
+    @DeleteMapping("/faqs/{faqId}")
+    public ResponseEntity<?> deleteFaq(@PathVariable Integer faqId) {
+        try {
+            int result = customerService.deleteFaq(faqId);
+
+            if (result > 0) {
+                return ResponseEntity.ok("FAQ가 삭제되었습니다");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("FAQ를 찾을 수 없습니다");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("오류 발생: " + e.getMessage());
+        }
+    }
+
     // ========================================
     // 1:1 문의 API
     // ========================================

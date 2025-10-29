@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.with_walk.mapper.HashtagMapper">
+
+    <!-- ========================================
+         해시태그 기본 CRUD
+         ======================================== -->
+
+    <!-- 해시태그 이름으로 조회 -->
+    <select id="findByName" resultType="com.example.with_walk.dto.HashtagDTO">
+        SELECT h_num AS hNum,
+               h_name AS hName,
+               h_count AS hCount,
+               created_at AS createdAt
+        FROM hashtags
+        WHERE h_name = #{hName}
+    </select>
+
+    <!-- 해시태그 번호로 조회 -->
+    <select id="findByNum" resultType="com.example.with_walk.dto.HashtagDTO">
+        SELECT h_num AS hNum,
+               h_name AS hName,
+               h_count AS hCount,
+               created_at AS createdAt
+        FROM hashtags
+        WHERE h_num = #{hNum}
+    </select>
+
+    <!-- 해시태그 등록 -->
+    <insert id="insertHashtag" useGeneratedKeys="true" keyProperty="hNum">
+        INSERT INTO hashtags (h_name, h_count)
+        VALUES (#{hName}, 0)
+    </insert>
+
+    <!-- 해시태그 사용 횟수 증가 -->
+    <update id="incrementCount">
+        UPDATE hashtags
+        SET h_count = h_count + 1
+        WHERE h_num = #{hNum}
+    </update>
+
+    <!-- 해시태그 사용 횟수 감소 -->
+    <update id="decrementCount">
+        UPDATE hashtags
+        SET h_count = h_count - 1
+        WHERE h_num = #{hNum}
+          AND h_count > 0
+    </update>
+
+    <!-- 인기 해시태그 조회 (상위 N개) -->
+    <select id="findTopHashtags" resultType="com.example.with_walk.dto.HashtagDTO">
+        SELECT h_num AS hNum,
+               h_name AS hName,
+               h_count AS hCount,
+               created_at AS createdAt
+        FROM hashtags
+        WHERE h_count > 0
+        ORDER BY h_count DESC, created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 해시태그 검색 (LIKE) -->
+    <select id="searchHashtags" resultType="com.example.with_walk.dto.HashtagDTO">
+        SELECT h_num AS hNum,
+               h_name AS hName,
+               h_count AS hCount,
+               created_at AS createdAt
+        FROM hashtags
+        WHERE h_name LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY h_count DESC, h_name ASC
+        LIMIT 20
+    </select>
+
+    <!-- ========================================
+         게시글-해시태그 연결
+         ======================================== -->
+
+    <!-- 게시글에 해시태그 연결 -->
+    <insert id="insertPostHashtag">
+        INSERT INTO post_hashtags (p_num, h_num)
+        VALUES (#{pNum}, #{hNum})
+    </insert>
+
+    <!-- 게시글의 모든 해시태그 연결 삭제 -->
+    <delete id="deletePostHashtagsByPostNum">
+        DELETE FROM post_hashtags
+        WHERE p_num = #{pNum}
+    </delete>
+
+    <!-- 특정 연결 삭제 -->
+    <delete id="deletePostHashtag">
+        DELETE FROM post_hashtags
+        WHERE p_num = #{pNum}
+          AND h_num = #{hNum}
+    </delete>
+
+    <!-- 게시글의 해시태그 목록 조회 -->
+    <select id="findHashtagsByPostNum" resultType="com.example.with_walk.dto.HashtagDTO">
+        SELECT h.h_num AS hNum,
+               h.h_name AS hName,
+               h.h_count AS hCount,
+               h.created_at AS createdAt
+        FROM hashtags h
+        INNER JOIN post_hashtags ph ON h.h_num = ph.h_num
+        WHERE ph.p_num = #{pNum}
+        ORDER BY h.h_name ASC
+    </select>
+
+    <!-- 해시태그로 게시글 번호 목록 조회 -->
+    <select id="findPostNumsByHashtagNum" resultType="java.lang.Integer">
+        SELECT p_num
+        FROM post_hashtags
+        WHERE h_num = #{hNum}
+        ORDER BY ph_num DESC
+    </select>
+
+    <!-- 해시태그 이름으로 게시글 번호 목록 조회 -->
+    <select id="findPostNumsByHashtagName" resultType="java.lang.Integer">
+        SELECT ph.p_num
+        FROM post_hashtags ph
+        INNER JOIN hashtags h ON ph.h_num = h.h_num
+        WHERE h.h_name = #{hName}
+        ORDER BY ph.ph_num DESC
+    </select>
+
+</mapper>

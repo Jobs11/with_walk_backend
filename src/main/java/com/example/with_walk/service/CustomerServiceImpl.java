@@ -86,6 +86,23 @@ public class CustomerServiceImpl implements CustomerService {
         return faqMapper.selectFaqById(faqId);
     }
 
+    // ========== FAQ(관리자) ==========
+
+    @Override
+    public int insertFaq(FaqDTO faq) {
+        return faqMapper.insertFaq(faq);
+    }
+
+    @Override
+    public int updateFaq(FaqDTO faq) {
+        return faqMapper.updateFaq(faq);
+    }
+
+    @Override
+    public int deleteFaq(Integer faqId) {
+        return faqMapper.deleteFaq(faqId);
+    }
+
     // ========== 문의 ==========
     @Override
     public List<InquiryDTO> getUserInquiries(String userId) {
@@ -133,4 +150,5 @@ public class CustomerServiceImpl implements CustomerService {
     public int getPendingInquiryCount() {
         return inquiryMapper.countPendingInquiries();
     }
+
 }

@@ -65,21 +65,43 @@ public class ChallengeServiceImpl implements ChallengeService {
             ChallengeDTO challenge = challengeMapper.selectChallengeById(
                     participant.getCNum(), userId);
 
-            if ("distance".equals(challenge.getCType())) {
-                int newValue = participant.getCpCurrentValue() + (int) distance;
-                challengeMapper.updateChallengeProgress(
-                        participant.getCpNum(),
-                        newValue);
+            int valueToAdd = 0;
 
-                if (newValue >= challenge.getCTargetValue()) {
-                    challengeMapper.updateChallengeComplete(participant.getCpNum());
+            // 챌린지 타입에 따라 추가값 계산
+            switch (challenge.getCType()) {
+                case "distance":
+                    // 거리 챌린지 (km)
+                    valueToAdd = (int) distance;
+                    break;
 
-                    BadgeDTO badge = new BadgeDTO();
-                    badge.setMId(userId);
-                    badge.setCNum(challenge.getCNum());
-                    badge.setMbBadgeName(challenge.getCReward());
-                    challengeMapper.insertBadge(badge);
-                }
+                case "frequency":
+                    // 횟수 챌린지 (1회 추가)
+                    valueToAdd = 1;
+                    break;
+
+                case "duration":
+                    // 시간 챌린지는 별도 처리 필요
+                    // 여기서는 스킵
+                    continue;
+            }
+
+            // 현재 진행값 업데이트
+            int newValue = participant.getCpCurrentValue() + valueToAdd;
+            challengeMapper.updateChallengeProgress(
+                    participant.getCpNum(),
+                    newValue);
+
+            // 목표 달성 확인
+            if (newValue >= challenge.getCTargetValue()) {
+                // 챌린지 완료 처리
+                challengeMapper.updateChallengeComplete(participant.getCpNum());
+
+                // 뱃지 지급
+                BadgeDTO badge = new BadgeDTO();
+                badge.setMId(userId);
+                badge.setCNum(challenge.getCNum());
+                badge.setMbBadgeName(challenge.getCReward());
+                challengeMapper.insertBadge(badge);
             }
         }
 

@@ -34,6 +34,15 @@ public interface CustomerService {
 
     FaqDTO getFaqDetail(Integer faqId);
 
+    // FAQ 등록 (관리자용)
+    int insertFaq(FaqDTO faq);
+
+    // FAQ 수정 (관리자용)
+    int updateFaq(FaqDTO faq);
+
+    // FAQ 삭제 (관리자용)
+    int deleteFaq(Integer faqId);
+
     // 문의
     List<InquiryDTO> getUserInquiries(String userId);
 
