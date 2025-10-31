@@ -53,4 +53,15 @@
             m_id = #{mId}
     </update>
 
+    <select id="getAllMembers" resultType="com.example.with_walk.dto.MemberDTO">
+    SELECT
+        *
+    FROM
+        members
+    WHERE
+        m_role != 'ADMIN'
+    ORDER BY
+        m_create DESC
+</select>
+
 </mapper>

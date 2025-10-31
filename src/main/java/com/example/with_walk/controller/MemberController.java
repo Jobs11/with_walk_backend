@@ -3,6 +3,8 @@ package com.example.with_walk.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -75,6 +77,17 @@ public class MemberController {
     public void updateProfile(@RequestBody MemberDTO member) {
         memberService.updateProfile(member);
         System.out.println("프로필 수정 성공");
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<MemberDTO>> getAllMembers() {
+        try {
+            List<MemberDTO> members = memberService.getAllMembers();
+            return ResponseEntity.ok(members);
+        } catch (Exception e) {
+            log.error("전체 회원 조회 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 }

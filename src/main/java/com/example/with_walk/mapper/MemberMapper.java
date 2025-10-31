@@ -26,4 +26,5 @@ public interface MemberMapper {
 
     public void updateProfile(MemberDTO memberVO);
 
+    List<MemberDTO> getAllMembers();
 }

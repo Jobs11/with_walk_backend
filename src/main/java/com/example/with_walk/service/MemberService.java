@@ -22,4 +22,6 @@ public interface MemberService {
     public void updateUser(MemberDTO member);
 
     public void updateProfile(MemberDTO memberVO);
+
+    List<MemberDTO> getAllMembers();
 }

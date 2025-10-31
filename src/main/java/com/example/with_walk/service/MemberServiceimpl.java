@@ -54,4 +54,9 @@ public class MemberServiceimpl implements MemberService {
         memberMapper.updateProfile(member);
     }
 
+    @Override
+    public List<MemberDTO> getAllMembers() {
+        return memberMapper.getAllMembers();
+    }
+
 }
